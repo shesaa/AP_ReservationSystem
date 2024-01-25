@@ -9,7 +9,6 @@ from datetime import datetime
 from portal_app.models import User
 
 
-
 class UserRegistration(forms.ModelForm):
     USER_TYPE_CHOICES = [
         ("P", "patient"),
@@ -17,8 +16,8 @@ class UserRegistration(forms.ModelForm):
     ]
 
     username = forms.CharField(max_length=20)
-    password = forms.CharField(widget=forms.PasswordInput)  # Use PasswordInput widget
-    user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES)  # Use the choices you've defined
+    password = forms.CharField(widget=forms.PasswordInput)
+    user_type = forms.ChoiceField(choices=USER_TYPE_CHOICES)
     phone_number = forms.CharField(max_length=11)
     email = forms.EmailField(max_length=254)
     age = forms.IntegerField()
@@ -26,6 +25,33 @@ class UserRegistration(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'password', 'user_type', 'phone_number', 'email', 'age')
+
+
+class UserLogin(forms.ModelForm):
+
+    username = forms.CharField(max_length=20)
+    password = forms.CharField(widget=forms.PasswordInput)  # Use PasswordInput widget
+
+
+    class Meta:
+        model = User
+        fields = ('username', 'password')
+
+
+
+
+class SetAppointment(forms.ModelForm):
+
+    reservation_time = forms.CharField(max_length="250")
+
+    clinic_id = models.CharField(max_length="250")
+
+    # reservation_time = models.DateTimeField()
+
+    class Meta:
+        model = Appointment
+        fields = ('reservation_time', 'clinic_id')
+
 
 # class UserRegistration(forms.ModelForm):
 #     USER_TYPE_CHOICES = [
@@ -113,26 +139,3 @@ class UpdatePasswords(PasswordChangeForm):
         fields = ('old_password', 'new_password1', 'new_password2')
 
 
-# class SaveCategory(forms.ModelForm):
-#     name = forms.CharField(max_length="250")
-#     description = forms.Textarea()
-#     status = forms.ChoiceField(choices=[('1', 'Active'), ('2', 'Inactive')])
-#
-#     class Meta:
-#         model = Category
-#         fields = ('name', 'description', 'status')
-#
-#     def clean_name(self):
-#         id = self.instance.id if self.instance.id else 0
-#         name = self.cleaned_data['name']
-#         # print(int(id) > 0)
-#         # raise forms.ValidationError(f"{name} Category Already Exists.")
-#         try:
-#             if int(id) > 0:
-#                 category = Category.objects.exclude(id=id).get(name=name)
-#             else:
-#                 category = Category.objects.get(name=name)
-#         except:
-#             return name
-#             # raise forms.ValidationError(f"{name} Category Already Exists.")
-#         raise forms.ValidationError(f"{name} Category Already Exists.")

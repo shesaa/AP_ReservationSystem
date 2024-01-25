@@ -8,14 +8,11 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-from portal_app.forms import UserRegistration
-
-
+from portal_app.forms import *
 
 context = {
     'page_title': 'File Management System',
 }
-
 
 # def signup(request):
 #     print(request.method)
@@ -40,46 +37,52 @@ from django.contrib.auth import login
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 import json
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
-
+from portal_app.models import *
 
 
 def login_user(request):
-    logout(request)
-    resp = {"status": 'failed', 'msg': ''}
-
-    if request.POST:
+    if request.method == 'POST':
+        # Get the username and password from the POST request
         username = request.POST['username']
         password = request.POST['password']
+        form = UserLogin(request.POST)
 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                resp['status'] = 'success'
-            else:
-                resp['msg'] = "Incorrect username or password"
+        user = form.is_valid()
+
+        # If we have a user, log them in and redirect to the desired page
+        if user is not None and User.objects.filter(username=username, password=password).exists():
+            user = User.objects.get(username=username)
+            login(request, user)
+            # Redirect to 'home' or some other page where you want users to go after login
+            return redirect('home')
+
+        # If credentials are not correct, return an error message
         else:
-            resp['msg'] = "Incorrect username or password"
-    return HttpResponse(json.dumps(resp), content_type='application/json')
+            messages.error(request, 'Username or password not correct')
+            return render(request, 'login.html')
 
+    else:
+        # For a GET request, just render the template
+        return render(request, 'login.html')
 
 
 def signup(request):
     if request.method == 'POST':
         form = UserRegistration(request.POST)
+        print(form.errors)
         if form.is_valid():
             # This saves the User object and returns it
             user = form.save(commit=False)
-            user.set_password(form.cleaned_data.get('password'))
+            user.password = form.cleaned_data.get('password')
             user.save()
-            # Ensure the user is authenticated before logging them in
-            if user.is_authenticated:
-                login(request, user)
-                return HttpResponseRedirect('/success_url/')  # Redirect them to some success page after signup
-            else:
-                # Handle cases where the user couldn't be authenticated
-                pass
+            return redirect('login')  # Redirect them to some success page after signup
+
         else:
             return render(request, 'signup.html', {'form': form})
     else:
@@ -88,22 +91,39 @@ def signup(request):
 
 
 
-# def signup(request):
-#     user = request.user
-#     if user.is_authenticated:
-#         return redirect('home-page')
-#     context['page_title'] = "Register User"
-#     if request.method == 'POST':
-#         data = request.POST
-#         form = UserRegistration(data)
-#         if form.is_valid():
-#             form.save()
-#             username = form.cleaned_data.get('username')
-#             pwd = form.cleaned_data.get('password1')
-#             loginUser = authenticate(username=username, password=pwd)
-#             login(request, loginUser)
-#             return redirect('/')
-#         else:
-#             context['reg_form'] = form
-#
-#     return render(request, 'signup.html', context)
+
+from django.contrib.auth.decorators import login_required
+
+
+@login_required(login_url='/login/')
+def set_appointment(request):
+    if request.method == 'POST':
+        form = SetAppointment(request.POST)
+        if form.is_valid():
+            # Save the appointment, but commit=False so it won't be saved to the database yet
+            appointment = form.save(commit=False)
+            # Assign the currently logged-in doctor to the appointment
+            user = request.user
+            appointment.dr_id = User.objects.get(username= user.username)
+
+            # Now you can save the appointment to the database
+            appointment.save()
+            # Redirect to a success page or another URL
+            return redirect('home')
+    else:
+        form = SetAppointment()
+    return render(request, 'set_appointment.html', {'form': form})
+
+
+def logout_user(request):
+    logout(request)
+    return redirect('login/')
+
+def home(request):
+    return render(request, 'home.html')
+    # return redirect('signup')
+
+
+def show_all_appointments(request):
+
+    pass
