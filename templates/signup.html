@@ -1,77 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signup</title>
 <style>
-    main {
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .signup-background {
+        background: linear-gradient(to right top, #ff758c, #ff7eb3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: 100%;
         width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: auto;
     }
-    #logo-img{
-        height: 8em;
-        width: 23em;
-    }
-</style>
-<div class="d-flex flex-column w-100 justify-content-center align-items-center">
-    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
-        <div class="card card-default rounded-0 shadow">
-            <div class="card-header">
-                <h4 class="card-title"><b>Signup</b></h4>
-            </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <form id="signup-user" method="post">
-                        {% csrf_token %}
-                        <div class="mdc-layout-grid">
-                            <div class="mdc-layout-grid__inner">
-                                <div class="form-group mb-3">
-                                    <label for="username" class="control-label">Username</label>
-                                    <input type="text" class="form-control rounded-0" autofocus name="username" id="username" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="password" class="control-label">Password</label>
-                                    <input type="password" class="form-control rounded-0" name="password" id="password" required="required">
-                                </div>
-                                <div class="form-group mb-3 ">
-                                    <label for="type" class="control-label">User Type</label>
-                                    <select name="user_type" id="type" class="form-select select2 rounded-0">
-                                        <option value="P">Patient</option>
-                                        <option value="C">Clinic Staff</option>
-                                    </select>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="phone_number" class="control-label">Phone Number</label>
-                                    <input type="tel" class="form-control rounded-0" name="phone_number" id="phone_number" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="email" class="control-label">Email</label>
-                                    <input type="email" class="form-control rounded-0" name="email" id="email" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="age" class="control-label">Age</label>
-                                    <input type="number" class="form-control rounded-0" name="age" id="age" required="required">
-                                </div>
 
-                                <div class="form-group mb-3">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div class="col-md-4">
-                                            {% comment %} <a href="{% url 'register-user' %}">Signup</a> {% endcomment %}
-                                        </div>
-                                        <button class="btn btn-sm rounded-0 btn-primary">
-                                                Signup
-                                            </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+    .signup-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="number"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+    }
+
+    .signup-btn {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #ff7eb3; /* Matching the gradient */
+        color: white;
+        cursor: pointer;
+    }
+
+    .signup-btn:hover {
+        background-color: #ee5a88; /* Darken button on hover */
+    }
+
+    .login-link {
+    display: inline-block;
+    color: #007bff;
+    text-decoration: none;
+    margin-top: 15px;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<div class="signup-background">
+    <div class="signup-container">
+        <form id="signup-user" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" autofocus name="username" id="username" required>
             </div>
-        </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <label for="type">User Type</label>
+                <select name="user_type" id="type" required>
+                    <option value="P">Patient</option>
+                    <option value="C">Clinic Staff</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input type="tel" name="phone_number" id="phone_number" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" name="age" id="age" required>
+            </div>
+            <button type="submit" class="signup-btn">Signup</button>
+            <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}" class="login-link">Log in</a></p>
+        </form>
     </div>
 </div>
 
-{#{% endblock pageContent %} {% block ScriptBlock %}#}
 <script>
     $(function() {
         $('#signup').submit(function(e) {
@@ -124,3 +165,5 @@
     })
 </script>
 {#{% endblock ScriptBlock %}#}
+</body>
+</html>

@@ -1,53 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
 <style>
-    main {
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .login-background {
+        background: linear-gradient(to right top, #65dfc9, #6cdbeb); /* Fallback for older browsers */
+        background: linear-gradient(to right top, #65dfc9, #6cdbeb);
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: 100%;
         width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: auto;
     }
-    #logo-img{
-        height: 8em;
-        width: 23em;
+
+    .login-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
     }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        box-sizing: border-box; /* Added for correct box sizing */
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+    .login-btn:hover {
+        background-color: #0056b3; /* Darken button on hover */
+    }
+    .signup-link {
+    display: inline-block;
+    color: #ff7eb3; /* Use your signup color theme */
+    text-decoration: none;
+    margin-top: 15px;
+}
+
+.signup-link:hover {
+    text-decoration: underline;
+}
 </style>
-<div class="d-flex flex-column w-100 justify-content-center align-items-center">
-    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
-        <div class="card card-default rounded-0 shadow">
-            <div class="card-header">
-                <h4 class="card-title"><b>Login</b></h4>
+</head>
+<body>
+
+<div class="login-background">
+    <div class="login-container">
+        <form id="login" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username" class="control-label">Username</label>
+                <input type="text" class="form-control" autofocus name="username" id="username" required>
             </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <form id="login" method="POST">
-                        {% csrf_token %}
-                        <div class="mdc-layout-grid">
-                            <div class="mdc-layout-grid__inner">
-                                <div class="form-group mb-3">
-                                    <label for="username" class="control-label">Username</label>
-                                    <input type="text" class="form-control rounded-0" autofocus name="username" id="username" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="password" class="control-label">Password</label>
-                                    <input type="password" class="form-control rounded-0" name="password" id="password" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div class="col-md-4">
-                                            {% comment %} <a href="{% url 'register-user' %}">Signup</a> {% endcomment %}
-                                        </div>
-                                        <button class="btn btn-sm rounded-0 btn-primary">
-                                                Login
-                                            </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+            <div class="form-group">
+                <label for="password" class="control-label">Password</label>
+                <input type="password" class="form-control" name="password" id="password" required>
             </div>
-        </div>
+            <button type="submit" class="login-btn">Login</button>
+            <p class="text-center mt-3">Don't have an account? <a href="{% url 'signup' %}" class="signup-link">Sign up</a></p>
+        </form>
     </div>
 </div>
 
@@ -102,3 +141,6 @@
         })
     })
 </script>
+
+</body>
+</html>
