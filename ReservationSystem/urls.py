@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from portal_app import views
 # from django.conf.urls import url
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +27,8 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
     path('set_appointment/', views.set_appointment, name='set_appointment'),
     path('home/', views.home, name='home'),
-    path('logout', views.logout_user, name = 'logout')
-]
+    path('logout', views.logout_user, name = 'logout'),
+    path('appointments', views.appointments, name = 'appointments'),
+    path('my_appointments', views.my_appointments, name = 'my_appointments'),
+    path('update_profile', views.update_profile, name = 'update_profile'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

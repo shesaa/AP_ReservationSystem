@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 from portal_app.forms import *
 
 context = {
-    'page_title': 'File Management System',
+    'page_title': '',
 }
 
 # def signup(request):
@@ -90,8 +90,6 @@ def signup(request):
         return render(request, 'signup.html', {'form': form})
 
 
-
-
 from django.contrib.auth.decorators import login_required
 
 
@@ -104,7 +102,7 @@ def set_appointment(request):
             appointment = form.save(commit=False)
             # Assign the currently logged-in doctor to the appointment
             user = request.user
-            appointment.dr_id = User.objects.get(username= user.username)
+            appointment.dr_id = User.objects.get(username=user.username)
 
             # Now you can save the appointment to the database
             appointment.save()
@@ -119,11 +117,39 @@ def logout_user(request):
     logout(request)
     return redirect('login/')
 
+
+@login_required(login_url='/login/')
 def home(request):
     return render(request, 'home.html')
     # return redirect('signup')
 
 
-def show_all_appointments(request):
+@login_required(login_url='/login/')
+def appointments(request):
+    appointments = Appointment.objects.all()
+    print(appointments)
 
+    return render(request, 'appointments.html', {'appointments': appointments})
+
+
+def my_appointments(request):
     pass
+
+
+@login_required(login_url='/login/')
+def update_profile(request):
+    context['page_title'] = 'Update Profile'
+    user = User.objects.get(id=request.user.id)
+    if not request.method == 'POST':
+        form = UpdateProfile(user=user)
+        context['form'] = form
+    else:
+        form = UpdateProfile(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile has been updated")
+            return redirect("profile")
+        else:
+            context['form'] = form
+
+    return render(request, 'update_profile.html', context)

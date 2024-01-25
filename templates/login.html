@@ -68,12 +68,20 @@
 .signup-link:hover {
     text-decoration: underline;
 }
+.form-title {
+    font-size: 2.5em; /* Adjust the size as needed */
+    color: #333; /* A color that fits the design */
+    text-align: center;
+    margin-bottom: 1.5em; /* Spacing below the title */
+}
 </style>
 </head>
 <body>
 
 <div class="login-background">
     <div class="login-container">
+        <h1 class="form-title">Clinic Appointment</h1> <!-- Title added here -->
+        <h2 class="text-center">Login</h2>
         <form id="login" method="POST">
             {% csrf_token %}
             <div class="form-group">

@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+
+
+                .user-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .green-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: green;
+            margin-right: 5px;
+        }
+    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments - Clinic Appointment</title>
+<link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'appointments' %}" class="active">Appointments</a>
+    <a href="{% url 'my_appointments' %}">My Appointments</a>
+    <a href="{% url 'update_profile' %}">Update Profile</a>
+    <a href="{% url 'logout' %}" style="float: right;">Logout</a>
+</div>
+        <div class="user-bar">
+            <span id="username"></span>
+            <div class="green-light"></div>
+        </div>
+<div class="content">
+    <h1>Available Appointments</h1>
+
+    <label for="page-size">Appointments per page:</label>
+    <select id="page-size" onchange="changePageSize(this.value)">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+    </select>
+
+    <table class="appointments-table">
+        <thead>
+            <tr>
+                <th>Date and Time</th>
+                <th>appointment_id</th>
+                <th>Doctor</th>
+                <th>Clinic</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.reservation_time }}</td>
+                <td>{{ appointment.appointment_id }}</td>
+                <td>{{ appointment.dr_id }}</td>
+                <td>{{ appointment.clinic_id }}</td>
+                <td>{{ appointment.reservation_status }}</td>
+                <td><button type="button" onclick="bookAppointment({{ appointment.id }})">Book</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if appointments.has_previous %}
+            <button onclick="location.href='?page={{ appointments.previous_page_number }}'">Previous</button>
+        {% endif %}
+        <span>Page {{ appointments.number }} of {{ appointments.paginator.num_pages }}</span>
+        {% if appointments.has_next %}
+            <button onclick="location.href='?page={{ appointments.next_page_number }}'">Next</button>
+        {% endif %}
+    </div>
+</div>
+
+    <script>
+        var currentUser = '{{ request.user.username }}';
+
+        document.getElementById("username").textContent = currentUser;
+    </script>
+<script>
+function changePageSize(newSize) {
+
+    location.href = '?page=1&size=' + newSize;
+}
+
+function bookAppointment(appointmentId) {
+
+    alert('Booking appointment ID: ' + appointmentId);
+}
+</script>
+
+</body>
+</html>
