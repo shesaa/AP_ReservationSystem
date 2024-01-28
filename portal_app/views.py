@@ -1,7 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
-
+import re
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 
@@ -156,16 +155,30 @@ def home(request):
     return render(request, 'home.html', context)
     # return redirect('signup')
 
+from django.db.models import Q
 
 @user_type_required('P')
 @login_required(login_url='/login/')
 def appointments(request):
     appointments_ = Appointment.objects.filter(reservation_status="NR")
-    print(appointments_)
+
+    if 'search' in request.GET:
+        search_query = request.GET.get('search', '')
+
+        appointments_by_dr = appointments_.filter(
+            dr_id__username__regex = search_query
+        )
+        appointments_by_clinic = appointments_.filter(
+            dr_id__username__regex = search_query
+        )
+
+        appointments_ = (appointments_by_dr | appointments_by_clinic).distinct()
+
+
     context['unread_count'] = unread_notifications_count(request)
     context['appointments'] = appointments_
 
-    return render(request, 'appointments.html',context)
+    return render(request, 'appointments.html', context)
 
 
 from django.shortcuts import redirect, get_object_or_404
