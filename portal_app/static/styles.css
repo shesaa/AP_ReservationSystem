@@ -1,0 +1,98 @@
+/* styles.css */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4; /* Light grey background */
+}
+
+.navbar {
+    background-color: #FFF; /* White background */
+    overflow: hidden;
+    border-bottom: 1px solid #e7e7e7;
+    padding: 0 10px;
+}
+
+.navbar a {
+    float: left;
+    display: block;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    color: #007bff; /* Bootstrap blue for link color */
+}
+
+.navbar a:hover {
+    background: #ddd; /* Light grey background on hover */
+    color: black;
+}
+
+.content {
+    padding: 20px;
+}
+
+.content h1 {
+    color: #007bff; /* Header color the same as links for consistency */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.content p {
+    line-height: 1.6;
+    color: #333; /* Dark grey text for readability */
+}
+
+/* Style for the table used in the appointments page */
+.appointments-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border-collapse: collapse;
+}
+
+.appointments-table th,
+.appointments-table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.appointments-table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Style for the pagination navigation */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 10px 15px;
+    margin: 0 10px;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+.pagination button:hover {
+    background: #e2e6ea;
+}
+
+        .user-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .green-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: green;
+            margin-right: 5px;
+        }
