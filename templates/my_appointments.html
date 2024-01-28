@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .user-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .green-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: green;
+            margin-right: 5px;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - Clinic Appointment</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'appointments' %}">Appointments</a>
+        <a href="{% url 'my_appointments' %}" class="active">My Appointments</a>
+        <a href="{% url 'update_profile' %}">Update Profile</a>
+                <a href="{% url 'notification_center' %}">
+        Notifications
+        <span id="notificationCounter" style="display:none; background-color:red; color:white; padding:3px 6px; border-radius:15px; font-size:12px; position:relative; top:-10px; left:-10px;"></span>
+    </a>
+        <a href="{% url 'logout' %}" style="float: right;">Logout</a>
+    </div>
+    <div class="user-bar">
+        <span id="username"></span>
+        <div class="green-light"></div>
+    </div>
+    <div class="content">
+        <h1>My Appointments</h1>
+
+        <table class="appointments-table">
+            <thead>
+                <tr>
+                    <th>Date and Time</th>
+                    <th>Appointment ID</th>
+                    <th>Doctor</th>
+                    <th>Clinic</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in my_appointments %}
+                <tr>
+                    <td>{{ appointment.reservation_time }}</td>
+                    <td>{{ appointment.appointment_id }}</td>
+                    <td>{{ appointment.dr_id }}</td>
+                    <td>{{ appointment.clinic_id }}</td>
+                    <td>{{ appointment.reservation_status }}</td>
+                    <td><button type="button" onclick="cancelAppointment('{{ appointment.appointment_id }}')">Cancel</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if my_appointments.has_previous %}
+                <button onclick="location.href='?page={{ my_appointments.previous_page_number }}'">Previous</button>
+            {% endif %}
+            <span>Page {{ my_appointments.number }} of {{ my_appointments.paginator.num_pages }}</span>
+            {% if my_appointments.has_next %}
+                <button onclick="location.href='?page={{ my_appointments.next_page_number }}'">Next</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        var currentUser = '{{ request.user.username }}';
+
+        document.getElementById("username").textContent = currentUser;
+    </script>
+
+    <script>
+function cancelAppointment(appointmentId) {
+    // Create a new XMLHttpRequest object
+    var xhr = new XMLHttpRequest();
+
+    // Set up the request method and URL
+    xhr.open('POST', 'cancel_appointment/', true);
+
+    // Set the request header if needed
+    xhr.setRequestHeader('Content-type', 'application/json');
+
+    // Set up the request payload
+    var data = {
+        appointment_id: appointmentId
+        // Additional data can be included if required
+    };
+
+    // Convert the data to JSON format
+    var jsonData = JSON.stringify(data);
+
+    // Set up the callback function for when the request is complete
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // Request successful, handle the response here if needed
+            alert('Appointment canceled successfully!');
+        } else {
+            // Request failed, handle the error here if needed
+            alert('Failed to cancel the appointment. Please try again.');
+        }
+    };
+
+    // Send the AJAX request
+    xhr.send(jsonData);
+}
+    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        var currentUser = '{{ request.user.username }}';
+        document.getElementById("username").textContent = currentUser;
+
+        {% if request.user.is_authenticated %}
+        var counter = document.getElementById('notificationCounter');
+        // Get unread_count from the Django context
+        var unread_count = {{ unread_count }};
+        if (unread_count > 0) {
+            counter.style.display = 'inline';
+            counter.textContent = unread_count;
+        }
+        {% endif %}
+    });
+</script>
+</body>
+</html>

@@ -8,7 +8,18 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
+
 from portal_app.forms import *
+
+
+def unread_notifications_count(request):
+    if request.user.is_authenticated:
+        unread_count = request.user.notification_set.filter(read=False).count()
+    else:
+        unread_count = 0
+    return unread_count
+
 
 context = {
     'page_title': '',
@@ -44,6 +55,26 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from portal_app.models import *
+
+from functools import wraps
+from django.http import HttpResponseForbidden
+from django.shortcuts import redirect
+
+
+# Custom decorator to check user type
+def user_type_required(user_type):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect('login')
+            if getattr(request.user, 'user_type', None) != user_type:
+                return HttpResponseForbidden("You do not have permission to view this page.")
+            return view_func(request, *args, **kwargs)
+
+        return _wrapped_view
+
+    return decorator
 
 
 def login_user(request):
@@ -93,6 +124,7 @@ def signup(request):
 from django.contrib.auth.decorators import login_required
 
 
+@user_type_required('C')
 @login_required(login_url='/login/')
 def set_appointment(request):
     if request.method == 'POST':
@@ -102,7 +134,7 @@ def set_appointment(request):
             appointment = form.save(commit=False)
             # Assign the currently logged-in doctor to the appointment
             user = request.user
-            appointment.dr_id = User.objects.get(username=user.username)
+            appointment.dr_id = user
 
             # Now you can save the appointment to the database
             appointment.save()
@@ -120,20 +152,88 @@ def logout_user(request):
 
 @login_required(login_url='/login/')
 def home(request):
-    return render(request, 'home.html')
+    context['unread_count'] = unread_notifications_count(request)
+    return render(request, 'home.html', context)
     # return redirect('signup')
 
 
+@user_type_required('P')
 @login_required(login_url='/login/')
 def appointments(request):
-    appointments = Appointment.objects.all()
-    print(appointments)
+    appointments_ = Appointment.objects.filter(reservation_status="NR")
+    print(appointments_)
+    context['unread_count'] = unread_notifications_count(request)
+    context['appointments'] = appointments_
 
-    return render(request, 'appointments.html', {'appointments': appointments})
+    return render(request, 'appointments.html',context)
 
 
+from django.shortcuts import redirect, get_object_or_404
+
+
+@user_type_required('P')
+@csrf_exempt
+@login_required(login_url='/login/')
+def cancel_appointment(request):
+    data = json.loads(request.body)
+    appointment_id = data['appointment_id']
+    user = request.user
+
+    appointment_ = Appointment.objects.get(appointment_id=appointment_id)
+    appointment_.patient_reserved_id = None
+    appointment_.reservation_status = 'NR'
+    appointment_.save()
+
+    dr_user = appointment_.dr_id
+
+    notification = Notification(to_user=user, message="Appointment Canceled !")
+    notification.save()
+
+    notification_dr = Notification(to_user=dr_user,
+                                   message=f"Appointment with id {appointment_.appointment_id} Canceled by User {user.id} !")
+    notification_dr.save()
+
+    return redirect('appointments')
+
+
+@user_type_required('P')
+@csrf_exempt
+@login_required(login_url='/login/')
+def reserve_appointment(request):
+    data = json.loads(request.body)
+    appointment_id = data['appointment_id']
+    # appointment_id = request.appointment_id
+    user = request.user
+    print(user, "usereeeee iddddd")
+
+    print(appointment_id, "hahahahahhhahhaahahah*****")
+
+    appointment_ = Appointment.objects.get(appointment_id=appointment_id)
+    appointment_.patient_reserved_id = user
+    appointment_.reservation_status = 'R'
+    appointment_.save()
+
+    dr_user = appointment_.dr_id
+
+    notification = Notification(to_user=user, message="Appointment RESERVED !")
+    notification.save()
+
+    notification_dr = Notification(to_user=dr_user,
+                                   message=f"Appointment with id {appointment_.appointment_id} RESERVED by User {user.id} !")
+    notification_dr.save()
+
+    return redirect('appointments')
+
+
+@user_type_required('P')
+@login_required(login_url='/login/')
 def my_appointments(request):
-    pass
+    user_id = request.user.id
+    my_appointments_ = Appointment.objects.filter(patient_reserved_id=user_id)
+    context['unread_count'] = unread_notifications_count(request)
+    context['my_appointments'] = my_appointments_
+
+    return render(request, 'my_appointments.html', context)
 
 
 @login_required(login_url='/login/')
@@ -152,4 +252,15 @@ def update_profile(request):
         else:
             context['form'] = form
 
+    context['unread_count'] = unread_notifications_count(request)
     return render(request, 'update_profile.html', context)
+
+
+@login_required(login_url='/login/')
+def notification_center(request):
+    user = request.user
+    notifications = Notification.objects.filter(to_user=user).order_by('-date_time')
+    for notification in notifications:
+        notification.read = True
+        notification.save()
+    return render(request, 'notification_center.html', {'notifications': notifications})

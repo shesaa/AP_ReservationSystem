@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Profile - Clinic Appointment</title>
+    <title>Notifications - Clinic Appointment</title>
     <style>
         body, html {
             height: 100%;
@@ -11,14 +11,12 @@
             font-family: Arial, sans-serif;
             background: #f4f4f4; /* Change background color as desired */
         }
-
         .navbar {
             background-color: white;
             overflow: hidden;
             border-bottom: 1px solid #e7e7e7;
             padding: 0 10px;
         }
-
         .navbar a {
             float: left;
             display: block;
@@ -28,40 +26,41 @@
             font-size: 17px;
             color: #007bff; /* Bootstrap primary color for consistency */
         }
-
         .navbar a:hover {
             background: #ddd;
             color: black;
         }
-
         .content {
             padding: 20px;
         }
-
         .content h1 {
             color: #007bff;
             text-align: center;
             margin-bottom: 20px;
         }
-
         .content p {
             line-height: 1.6;
             color: #333;
         }
-
         .user-bar {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            margin-top: 10px;
         }
-
         .green-light {
             width: 10px;
             height: 10px;
             border-radius: 50%;
             background-color: green;
             margin-right: 5px;
+        }
+        .notification {
+            background: #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #007bff;
         }
     </style>
 </head>
@@ -71,60 +70,26 @@
         <a href="{% url 'appointments' %}">Appointments</a>
         <a href="{% url 'my_appointments' %}">My Appointments</a>
         <a href="{% url 'update_profile' %}">Update Profile</a>
-                <a href="{% url 'notification_center' %}">
-        Notifications
-        <span id="notificationCounter" style="display:none; background-color:red; color:white; padding:3px 6px; border-radius:15px; font-size:12px; position:relative; top:-10px; left:-10px;"></span>
-    </a>
+        <a href="{% url 'notification_center' %}">Notifications</a>
         <a href="{% url 'logout' %}" style="float: right;">Logout</a>
     </div>
-        <div class="user-bar">
-            <span id="username"></span>
-            <div class="green-light"></div>
-        </div>
-    <div class="content">
-        <h1>Update Profile</h1>
-
-
-
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">Update</button>
-        </form>
+    <div class="user-bar">
+        <span id="username"></span>
+        <div class="green-light"></div>
     </div>
-
-
-
+    <div class="content">
+        <h1>Notifications</h1>
+        {% for notification in notifications %}
+        <div class="notification">
+            {{ notification.message }} - {{ notification.date_time }}
+        </div>
+        {% empty %}
+        <p>No notifications found</p>
+        {% endfor %}
+    </div>
     <script>
-
-        $(document).ready(function () {
-            $('form').submit(function (e) {
-                var newPassword1 = $('#id_new_password1').val();
-                var newPassword2 = $('#id_new_password2').val();
-
-                if (newPassword1 !== newPassword2) {
-                    alert("New passwords do not match.");
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
         var currentUser = '{{ request.user.username }}';
         document.getElementById("username").textContent = currentUser;
-
-        {% if request.user.is_authenticated %}
-        var counter = document.getElementById('notificationCounter');
-        // Get unread_count from the Django context
-        var unread_count = {{ unread_count }};
-        if (unread_count > 0) {
-            counter.style.display = 'inline';
-            counter.textContent = unread_count;
-        }
-        {% endif %}
-    });
-</script>
+    </script>
 </body>
 </html>

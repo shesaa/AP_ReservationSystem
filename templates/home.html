@@ -72,6 +72,10 @@
     <a href="{% url 'appointments' %}">Appointments</a>
     <a href="{% url 'my_appointments' %}">My Appointments</a>
     <a href="{% url 'update_profile' %}">Update Profile</a>
+        <a href="{% url 'notification_center' %}">
+        Notifications
+        <span id="notificationCounter" style="display:none; background-color:red; color:white; padding:3px 6px; border-radius:15px; font-size:12px; position:relative; top:-10px; left:-10px;"></span>
+    </a>
     <a href="{% url 'logout' %}" style="float: right;">Logout</a>
 </div>
         <div class="user-bar">
@@ -83,12 +87,21 @@
     <p>Here you can book new appointments, view your upcoming appointments, and manage your profile information with ease. Just use the navigation links above to get where you need to go.</p>
 </div>
 
-    <script>
-
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
         var currentUser = '{{ request.user.username }}';
-
-
         document.getElementById("username").textContent = currentUser;
-    </script>
+
+        {% if request.user.is_authenticated %}
+        var counter = document.getElementById('notificationCounter');
+        // Get unread_count from the Django context
+        var unread_count = {{ unread_count }};
+        if (unread_count > 0) {
+            counter.style.display = 'inline';
+            counter.textContent = unread_count;
+        }
+        {% endif %}
+    });
+</script>
 </body>
 </html>

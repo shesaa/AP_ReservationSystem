@@ -22,13 +22,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.login_user, name='login'),
-    path('set_appointment/', views.set_appointment, name='set_appointment'),
-    path('home/', views.home, name='home'),
-    path('logout', views.logout_user, name = 'logout'),
-    path('appointments', views.appointments, name = 'appointments'),
-    path('my_appointments', views.my_appointments, name = 'my_appointments'),
-    path('update_profile', views.update_profile, name = 'update_profile'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+                  path('admin/', admin.site.urls),
+                  path('signup/', views.signup, name='signup'),
+                  path('login/', views.login_user, name='login'),
+                  path('set_appointment/', views.set_appointment, name='set_appointment'),
+                  path('home/', views.home, name='home'),
+                  path('logout', views.logout_user, name='logout'),
+                  path('appointments', views.appointments, name='appointments'),
+                  path('my_appointments', views.my_appointments, name='my_appointments'),
+                  path('update_profile', views.update_profile, name='update_profile'),
+                  path('reserve_appointment/', views.reserve_appointment, name='reserve_appointment'),
+                  path('cancel_appointment/', views.cancel_appointment, name='cancel_appointment'),
+                  path('notifications/', views.notification_center, name='notification_center'),
+              ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

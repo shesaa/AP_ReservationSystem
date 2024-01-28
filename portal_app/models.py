@@ -125,7 +125,7 @@ class Appointment(models.Model):
 
     ]
 
-    appointment_id = models.AutoField(primary_key=True, default=0)
+    appointment_id = models.AutoField(primary_key=True)
 
     clinic_id = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='clinic_appointments', null=True,
                                   blank=True)
@@ -147,4 +147,5 @@ class Notification(models.Model):
     to_user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField()
     date_time = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
     pass
