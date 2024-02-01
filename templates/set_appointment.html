@@ -1,15 +1,70 @@
-
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Set Appointment</title>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Appointment - Clinic Appointment</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        /* Your additional styles here */
+        /* For example, if you want to override the button style from 'styles.css': */
+        .set-appointment-btn {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #009cdf; /* A shade of blue */
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        /* Style for the form wrapper */
+        .form-wrapper {
+            background: #f1f1f1;
+            padding: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+    </style></head>
 <body>
-    <h2>Set Appointment</h2>
-    <form method="post">
+
+<div class="navbar">
+
+    {% if request.user.user_type == 'P' %}
+            <a href="{% url 'home' %}">Home</a>
+
+        <!-- If the user type is 'P' -->
+        <a href="{% url 'appointments' %}">Appointments</a>
+    {% elif request.user.user_type == 'C' %}
+            <a href="{% url 'main' %}">Home</a>
+
+        <!-- If the user type is 'C' -->
+        <a href="{% url 'set_appointment' %}">Set Appointment</a>
+    {% endif %}
+
+    <a href="{% url 'my_appointments' %}" class="active">My Appointments</a>
+    <a href="{% url 'update_profile' %}">Update Profile</a>
+    <a href="{% url 'notification_center' %}">
+        Notifications
+        <span id="notificationCounter" style="display:none; background-color:red; color:white; padding:3px 6px; border-radius:15px; font-size:12px; position:relative; top:-10px; left:-10px;"></span>
+    </a>
+    <a href="{% url 'logout' %}" style="float: right;">Logout</a>
+</div>
+
+
+<div class="content" style="text-align: center;">
+    <h1 style="margin-top: 50px;">Set Appointment</h1>
+
+    <form method="post" style="display: inline-block; margin-top: 50px;">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Set Appointment</button>
+        <div style="background: #f1f1f1; padding: 20px; text-align: left; display: inline-block;">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" style="display: block; width: 100%; margin-top: 10px; padding: 10px; background-color: #009cdf; color: white; border: none; border-radius: 5px;">Set Appointment</button>
     </form>
+</div>
+
+
 </body>
 </html>

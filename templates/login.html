@@ -74,9 +74,36 @@
     text-align: center;
     margin-bottom: 1.5em; /* Spacing below the title */
 }
+
+        /* Popup Message Styles */
+.popup-message-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.popup-message {
+    background-color: red;
+    color: black;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-width: 250px;
+}
 </style>
 </head>
 <body>
+<!-- Popup Message Container -->
+{#    <div id="loginErrorPopup" class="popup-message-container">#}
+{#        <div class="popup-message"></div>#}
+<div id="loginErrorPopup" class="popup-message-container" style="display: none;">
+    <div class="popup-message">
+        Invalid username or password.
+    </div>
+</div>
 
 <div class="login-background">
     <div class="login-container">
@@ -148,6 +175,33 @@
             })
         })
     })
+
+
+
+
+
+           document.addEventListener('DOMContentLoaded', (event) => {
+            var errorMessage = "{{ error_message }}";
+            if (errorMessage) {
+                showPopupMessage(errorMessage, true);
+            }
+        });
+
+        function showPopupMessage(message, isError) {
+            var popupMessageContainer = document.getElementById('loginErrorPopup');
+            var popupMessage = popupMessageContainer.querySelector('.popup-message');
+
+            // Set the text message
+            popupMessage.textContent = message;
+
+            // Show the message
+            popupMessageContainer.style.display = 'block';
+
+            // Hide the message after 3 seconds
+            setTimeout(function() {
+                popupMessageContainer.style.display = 'none';
+            }, 3000);
+        }
 </script>
 
 </body>

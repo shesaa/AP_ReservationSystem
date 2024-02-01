@@ -65,14 +65,29 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <a href="{% url 'home' %}">Home</a>
+<div class="navbar">
+
+    {% if request.user.user_type == 'P' %}
+            <a href="{% url 'home' %}">Home</a>
+
+        <!-- If the user type is 'P' -->
         <a href="{% url 'appointments' %}">Appointments</a>
-        <a href="{% url 'my_appointments' %}">My Appointments</a>
-        <a href="{% url 'update_profile' %}">Update Profile</a>
-        <a href="{% url 'notification_center' %}">Notifications</a>
-        <a href="{% url 'logout' %}" style="float: right;">Logout</a>
-    </div>
+    {% elif request.user.user_type == 'C' %}
+            <a href="{% url 'main' %}">Home</a>
+
+        <!-- If the user type is 'C' -->
+        <a href="{% url 'set_appointment' %}">Set Appointment</a>
+    {% endif %}
+
+    <a href="{% url 'my_appointments' %}" class="active">My Appointments</a>
+    <a href="{% url 'update_profile' %}">Update Profile</a>
+    <a href="{% url 'notification_center' %}">
+        Notifications
+        <span id="notificationCounter" style="display:none; background-color:red; color:white; padding:3px 6px; border-radius:15px; font-size:12px; position:relative; top:-10px; left:-10px;"></span>
+    </a>
+    <a href="{% url 'logout' %}" style="float: right;">Logout</a>
+</div>
+
     <div class="user-bar">
         <span id="username"></span>
         <div class="green-light"></div>

@@ -34,4 +34,6 @@ urlpatterns = [
                   path('reserve_appointment/', views.reserve_appointment, name='reserve_appointment'),
                   path('cancel_appointment/', views.cancel_appointment, name='cancel_appointment'),
                   path('notifications/', views.notification_center, name='notification_center'),
+                  path('doctor_profile/<int:doctor_id>/', views.doctor_profile, name='doctor_profile'),
+                    path('main/', views.main, name='main')
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

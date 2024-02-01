@@ -28,21 +28,26 @@ class UserRegistration(forms.ModelForm):
 
 
 class UserLogin(forms.ModelForm):
-
     username = forms.CharField(max_length=20)
     password = forms.CharField(widget=forms.PasswordInput)  # Use PasswordInput widget
-
 
     class Meta:
         model = User
         fields = ('username', 'password')
 
 
+from django import forms
 
 
 class SetAppointment(forms.ModelForm):
-
-    reservation_time = forms.CharField(max_length="250")
+    # reservation_time = forms.CharField(max_length="250")
+    reservation_time = forms.DateTimeField(
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(attrs={
+            'type': 'datetime-local',
+            'class': 'form-control',
+        }, format='%Y-%m-%dT%H:%M')
+    )
 
     clinic_id = models.CharField(max_length="250")
 
@@ -137,5 +142,3 @@ class UpdateProfile(PasswordChangeForm):
     class Meta:
         model = User
         fields = ('password', "phone_number")
-
-

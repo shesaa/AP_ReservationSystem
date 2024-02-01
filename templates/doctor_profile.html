@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile - Clinic Appointment</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <!-- Include the style block if it's required in this page as well -->
+    <style>
+/* Popup Message Styles */
+.popup-message-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.popup-message {
+    background-color: green;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-width: 250px;
+}
+
+.back-to-appointments-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    margin: 10px 0px;
+    border-radius: 4px;
+    text-decoration: none; /* Remove this line if you're using a button element */
+}
+
+/* This will make sure the button is not too stretched on larger screens */
+.container {
+    max-width: 1200px; /* or any other max-width that matches your design */
+    margin: auto;
+    padding: 0 10px; /* This adds some padding on the sides */
+}
+
+        .user-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .green-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: green;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Popup Message Container -->
+<div id="popupMessage" class="popup-message-container" style="display: none;">
+    <div class="popup-message">
+        Appointment reserved successfully!
+    </div>
+</div>
+
+
+<div class="navbar">
+<!-- Copy the navbar from the appointments page -->
+</div>
+
+<div class="user-bar">
+    <!-- Copy the user-bar from the appointments page -->
+    <span id="username"></span>
+    <div class="green-light"></div>
+</div>
+
+<div class="content">
+ <div class="back-button-container">
+{#        <button onclick="window.location.href='{% url 'appointments' %}'">&#8592; Back to Appointments</button>#}
+     <a href="{% url 'appointments' %}" class="back-to-appointments-btn">&#8592; Back to Appointments</a>
+    </div>
+
+    <h1>Doctor Profile</h1>
+    <div class="doctor-details">
+        <!-- Display doctor's profile details -->
+        <p>Name : {{ doctor.username }}</p>
+        <p>ID : {{ doctor.id }}</p>
+        <!-- Add any additional details as per your requirements -->
+    </div>
+
+    <h2>Available Appointments </h2>
+    <table class="appointments-table">
+        <thead>
+            <tr>
+                <th>Date and Time</th>
+                <th>Appointment ID</th>
+                <th>Clinic</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.reservation_time }}</td>
+                <td>{{ appointment.appointment_id }}</td>
+                <td>{{ appointment.clinic.name }}</td>
+                <td>{{ appointment.reservation_status }}</td>
+                <td><button type="button" onclick="bookAppointment('{{ appointment.appointment_id }}')">Book</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Include the scripts responsible for booking and updating the username as in the appointments page -->
+<script>
+    // Same script used in the appointments page for booking
+function bookAppointment(appointmentId) {
+    // Create a new XMLHttpRequest object
+    var xhr = new XMLHttpRequest();
+
+    // Set up the request method and URL
+    xhr.open('POST', '', true); // Replace '/book-appointment/' with the actual URL to book the appointment
+
+    // Set the request header if needed
+    xhr.setRequestHeader('Content-type', 'application/json');
+
+    // Set up the request payload
+    var data = {
+        appointment_id: appointmentId
+        // Additional data can be included if required
+    };
+
+    // Convert the data to JSON format
+    var jsonData = JSON.stringify(data);
+
+    // Set up the callback function for when the request is complete
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // Request successful, handle the response here if needed
+            showPopupMessage('Appointment booked successfully!');
+        } else {
+            // Request failed, handle the error here if needed
+            showPopupMessage('Failed to book the appointment. Please try again.');
+        }
+    };
+
+    // Send the AJAX request
+    xhr.send(jsonData);
+}
+function showPopupMessage(message, isError) {
+    var popupMessageContainer = document.getElementById('popupMessage');
+    var popupMessage = popupMessageContainer.querySelector('.popup-message');
+
+    // Set the text message
+    popupMessage.textContent = message;
+
+    // Add error styling if there is an error
+    if (isError) {
+        popupMessage.style.backgroundColor = 'red';
+    }
+
+    // Show the message
+    popupMessageContainer.style.display = 'block';
+
+    // Hide the message after 3 seconds
+    setTimeout(function() {
+        popupMessageContainer.style.display = 'none';
+        // Reset to default success style
+        if (isError) {
+            popupMessage.style.backgroundColor = 'green';
+        }
+    }, 3000);
+}
+</script>
+<script>
+    // Same script used in the appointments page for setting the currentUser
+    document.addEventListener('DOMContentLoaded', (event) => {
+        var currentUser = '{{ request.user.username }}';
+        document.getElementById("username").textContent = currentUser;
+        // ... rest of the script ...
+    });
+</script>
+
+</body>
+</html>
