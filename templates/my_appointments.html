@@ -79,13 +79,34 @@
     </div>
     <div class="content">
         <h1>My Appointments</h1>
+<form action="{% url 'my_appointments' %}" method="GET">
+    {% csrf_token %}
+    {% if user_type == 'C' %}
+        <label>
+            <input type="checkbox" name="hide_canceled" {% if hide_canceled %}checked{% endif %}>
+            Hide Canceled Appointments
+        </label>
+        <button type="submit" style="background-color: blue; color: white; padding: 5px; border: none; cursor: pointer; border-radius: 5px;">Apply</button>
+    {% endif %}
+</form>
+
+
+
+<!-- Rest of your HTML code, including the table -->
 
         <table class="appointments-table">
+
             <thead>
                 <tr>
                     <th>Date and Time</th>
                     <th>Appointment ID</th>
-                    <th>Doctor</th>
+                    <th>
+                        {% if request.user.user_type == 'P' %}
+                            Doctor
+                        {% elif request.user.user_type == 'C' %}
+                            Patient
+                        {% endif %}
+                    </th>
                     <th>Clinic</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -96,12 +117,28 @@
                 <tr>
                     <td>{{ appointment.reservation_time }}</td>
                     <td>{{ appointment.appointment_id }}</td>
-                    <td><a href="{% url 'doctor_profile' appointment.dr_id.id %}">{{ appointment.dr_id }}</a></td>
+
+                    <td>
+                        {% if request.user.user_type == 'P' %}
+
+                            <a href="{% url 'doctor_profile' appointment.dr.id %}">{{ appointment.dr }}</a>
+
+                        {% elif request.user.user_type == 'C' %}
+                            {{ appointment.patient_reserved }}
+
+                        {% endif %}
+
+                    </td>
                     <td>{{ appointment.clinic_id }}</td>
                     <td>{{ appointment.reservation_status }}</td>
-                    <td><button type="button" onclick="cancelAppointment('{{ appointment.appointment_id }}')">Cancel</button></td>
-                </tr>
-                {% endfor %}
+                    <td>
+                        {% if appointment.reservation_status == 'C' %}
+                            <span style="color: red">Out</span>
+                        {% else %}
+                            <button type="button" onclick="cancelAppointment('{{ appointment.appointment_id }}')">Cancel</button>
+                        {% endif %}
+                    </td>                </tr>
+                        {% endfor %}
             </tbody>
         </table>
 
@@ -146,10 +183,10 @@ function cancelAppointment(appointmentId) {
     xhr.onload = function() {
         if (xhr.status === 200) {
             // Request successful, handle the response here if needed
-            showPopupMessage('Appointment canceled successfully!');
+            showPopupMessage('Appointment canceled successfully!', false);
         } else {
             // Request failed, handle the error here if needed
-            showPopupMessage('Failed to cancel the appointment. Please try again.');
+            showPopupMessage('Failed to cancel the appointment. Please try again.', true);
         }
     };
 

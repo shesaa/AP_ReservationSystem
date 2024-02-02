@@ -115,7 +115,7 @@
                 <td>{{ appointment.appointment_id }}</td>
                 <td>{{ appointment.clinic.name }}</td>
                 <td>{{ appointment.reservation_status }}</td>
-                <td><button type="button" onclick="bookAppointment('{{ appointment.appointment_id }}')">Book</button></td>
+                <td><button type="button" onclick="bookAppointment('{{ appointment.appointment_id }}')">Reserve</button></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -148,10 +148,10 @@ function bookAppointment(appointmentId) {
     xhr.onload = function() {
         if (xhr.status === 200) {
             // Request successful, handle the response here if needed
-            showPopupMessage('Appointment booked successfully!');
+            showPopupMessage('Appointment booked successfully!', false);
         } else {
             // Request failed, handle the error here if needed
-            showPopupMessage('Failed to book the appointment. Please try again.');
+            showPopupMessage('Failed to book the appointment. Please try again.', true);
         }
     };
 

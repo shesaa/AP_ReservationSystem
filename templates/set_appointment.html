@@ -51,7 +51,10 @@
     </a>
     <a href="{% url 'logout' %}" style="float: right;">Logout</a>
 </div>
-
+    <div class="user-bar">
+        <span id="username"></span>
+        <div class="green-light"></div>
+    </div>
 
 <div class="content" style="text-align: center;">
     <h1 style="margin-top: 50px;">Set Appointment</h1>
@@ -64,7 +67,10 @@
         <button type="submit" style="display: block; width: 100%; margin-top: 10px; padding: 10px; background-color: #009cdf; color: white; border: none; border-radius: 5px;">Set Appointment</button>
     </form>
 </div>
-
+    <script>
+        var currentUser = '{{ request.user.username }}';
+        document.getElementById("username").textContent = currentUser;
+    </script>
 
 </body>
 </html>

@@ -29,7 +29,7 @@ class UserRegistration(forms.ModelForm):
 
 class UserLogin(forms.ModelForm):
     username = forms.CharField(max_length=20)
-    password = forms.CharField(widget=forms.PasswordInput)  # Use PasswordInput widget
+    password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
         model = User
@@ -55,7 +55,7 @@ class SetAppointment(forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ('reservation_time', 'clinic_id')
+        fields = ('reservation_time', 'clinic')
 
 
 # class UserRegistration(forms.ModelForm):
@@ -128,17 +128,15 @@ class SetAppointment(forms.ModelForm):
 #         raise forms.ValidationError(f"The {user.username} mail is already exists/taken")
 
 
-class UpdateProfile(PasswordChangeForm):
+class UpdateProfile(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-sm rounded-0'}), label="Old Password")
+        widget=forms.PasswordInput(), label="Old Password")
     new_password1 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-sm rounded-0'}), label="New Password")
+        widget=forms.PasswordInput(), label="New Password")
     new_password2 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control form-control-sm rounded-0'}),
+        widget=forms.PasswordInput(),
         label="Confirm New Password")
-
-    phone_number = forms.CharField(max_length=11)
 
     class Meta:
         model = User
-        fields = ('password', "phone_number")
+        fields = ('password',)

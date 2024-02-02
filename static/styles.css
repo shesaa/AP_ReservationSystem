@@ -114,3 +114,15 @@ body, html {
     text-align: center;
     min-width: 250px;
 }
+
+/*!* Default blue theme *!*/
+/*body {*/
+/*    background-color: #f4f4f4;*/
+/*    color: #333;*/
+/*}*/
+
+/*!* Green theme for user type 'C' *!*/
+/*body.green-theme {*/
+/*    background-color: #eaf5e1; !* Light green background *!*/
+/*    color: #004d00; !* Dark green text color *!*/
+/*}*/

@@ -1,12 +1,5 @@
-from django.shortcuts import render
+from django.contrib.auth import logout
 
-import re
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from portal_app.forms import *
@@ -24,40 +17,16 @@ context = {
     'page_title': '',
 }
 
-# def signup(request):
-#     print(request.method)
-#     if request.method == 'POST':
-#         form = UserRegistration(request.POST)
-#         print(request.POST)
-#         print(form.is_valid())
-#         print(form.errors)
-#         if form.is_valid():
-#             form.save()
-#             username = form.cleaned_data.get('username')
-#             raw_password = form.cleaned_data.get('password1')
-#             user = authenticate(username=username, password=raw_password)
-#             login(request, user)
-#             return redirect('home')
-#     else:
-#         form = UserRegistration()
-#     return render(request, 'signup.html', {"form" : form})
-
-
-from django.contrib.auth import login
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 import json
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.shortcuts import render
+from django.contrib.auth import login
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 
 from portal_app.models import *
 
 from functools import wraps
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect
 
 
 # Custom decorator to check user type
@@ -84,13 +53,15 @@ def login_user(request):
         form = UserLogin(request.POST)
 
         user = form.is_valid()
-
+        # print(password, "passworde agha here")
+        # print(User.objects.get(username=username).password)
+        # print(User.objects.get(username=username).check_password(password))
         # If we have a user, log them in and redirect to the desired page
-        if user is not None and User.objects.filter(username=username, password=password).exists():
+        if user is not None and User.objects.filter(username=username).exists() and User.objects.get(
+                username=username).check_password(password):
             user = User.objects.get(username=username)
             login(request, user)
             if getattr(request.user, 'user_type', None) == "C":
-                print("dokieee")
                 return redirect('main')
             return redirect('home')
 
@@ -108,11 +79,11 @@ def login_user(request):
 def signup(request):
     if request.method == 'POST':
         form = UserRegistration(request.POST)
-        print(form.errors)
+        # print(form.errors)
         if form.is_valid():
             # This saves the User object and returns it
             user = form.save(commit=False)
-            user.password = form.cleaned_data.get('password')
+            user.set_password(form.cleaned_data.get('password'))
             user.save()
             return redirect('login')  # Redirect them to some success page after signup
 
@@ -132,16 +103,16 @@ def set_appointment(request):
     if request.method == 'POST':
         form = SetAppointment(request.POST)
         if form.is_valid():
-            # Save the appointment, but commit=False so it won't be saved to the database yet
+            # Save the appointment, but commit=False, so it won't be saved to the database yet
             appointment = form.save(commit=False)
             # Assign the currently logged-in doctor to the appointment
             user = request.user
-            appointment.dr_id = user
+            appointment.dr = user
 
             # Now you can save the appointment to the database
             appointment.save()
             # Redirect to a success page or another URL
-            return redirect('home')
+            return redirect('main')
     else:
         form = SetAppointment()
     return render(request, 'set_appointment.html', {'form': form})
@@ -170,22 +141,37 @@ def main(request):
     return render(request, 'main.html', context)
 
 
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+
 @user_type_required('P')
 @login_required(login_url='/login/')
 def appointments(request):
     appointments_ = Appointment.objects.filter(reservation_status="NR")
 
+    page_size = request.GET.get('size', 5)
+
     if 'search' in request.GET:
         search_query = request.GET.get('search', '')
 
         appointments_by_dr = appointments_.filter(
-            dr_id__username__regex=search_query
+            dr__username__regex=search_query
         )
         appointments_by_clinic = appointments_.filter(
-            dr_id__username__regex=search_query
+            dr__username__regex=search_query
         )
 
         appointments_ = (appointments_by_dr | appointments_by_clinic).distinct()
+
+    paginator = Paginator(appointments_, page_size)
+
+    page_number = request.GET.get('page')
+    try:
+        appointments_ = paginator.page(page_number)
+    except PageNotAnInteger:
+        appointments_ = paginator.page(1)
+    except EmptyPage:
+        appointments_ = paginator.page(paginator.num_pages)
 
     context['unread_count'] = unread_notifications_count(request)
     context['appointments'] = appointments_
@@ -193,7 +179,7 @@ def appointments(request):
     return render(request, 'appointments.html', context)
 
 
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 
 
 @csrf_exempt
@@ -206,20 +192,23 @@ def cancel_appointment(request):
     user_type = "C" if getattr(user, 'user_type', None) == "C" else "P"
 
     appointment_ = Appointment.objects.get(appointment_id=appointment_id)
-    appointment_.patient_reserved_id = None
+    if user_type == "P":
+        appointment_.patient_reserved = None
     appointment_.reservation_status = 'NR' if user_type == "P" else "C"
     appointment_.save()
 
-    second_user = appointment_.dr_id if user_type == "P" else appointment_.patient_reserved_id
+    second_user = appointment_.dr if user_type == "P" else appointment_.patient_reserved
 
     notification = Notification(to_user=user, message=f"Appointment {appointment_id} Canceled !")
     notification.save()
 
+    if user_type == "C" and appointment_.patient_reserved is None:
+        return redirect('home' if user_type == "P" else "main")
     notification_second = Notification(to_user=second_user,
-                                   message=f"Appointment with id {appointment_.appointment_id} Canceled by {user.id} !")
+                                       message=f"Appointment with id {appointment_.appointment_id} Canceled by {user.username} !")
     notification_second.save()
 
-    return redirect('home' if user_type=="P" else "main")
+    return redirect('home' if user_type == "P" else "main")
 
 
 @user_type_required('P')
@@ -232,17 +221,18 @@ def reserve_appointment(request):
     user = request.user
 
     appointment_ = Appointment.objects.get(appointment_id=appointment_id)
-    appointment_.patient_reserved_id = user
+
+    appointment_.patient_reserved = user
     appointment_.reservation_status = 'R'
     appointment_.save()
 
-    dr_user = appointment_.dr_id
+    dr_user = appointment_.dr
 
     notification = Notification(to_user=user, message=f"Appointment {appointment_id} RESERVED !")
     notification.save()
 
     notification_dr = Notification(to_user=dr_user,
-                                   message=f"Appointment with id {appointment_.appointment_id} RESERVED by User {user.id} !")
+                                   message=f"Appointment with id {appointment_id} RESERVED by User {user.username} !")
     notification_dr.save()
 
     return redirect('appointments')
@@ -251,53 +241,53 @@ def reserve_appointment(request):
 @login_required(login_url='/login/')
 def my_appointments(request):
     user = request.user
-    user_id = user.id
     user_type = "C" if getattr(user, 'user_type', None) == "C" else "P"
 
     if user_type == "P":
-        my_appointments_ = Appointment.objects.filter(patient_reserved_id=user_id)
+        my_appointments_ = Appointment.objects.filter(patient_reserved=user).order_by('-reservation_time')
     else:
-        my_appointments_ = Appointment.objects.filter(dr_id=user_id)
-    context['unread_count'] = unread_notifications_count(request)
-    context['my_appointments'] = my_appointments_
+        my_appointments_ = Appointment.objects.filter(dr_id=user).order_by('-reservation_time')
 
+    hide_canceled = request.GET.get('hide_canceled') == 'on'
+
+    if user_type == "C" and hide_canceled:
+        my_appointments_ = my_appointments_.exclude(reservation_status='C')
+
+    context = {
+        'unread_count': unread_notifications_count(request),
+        'my_appointments': my_appointments_,
+        'user_type': user_type
+    }
     return render(request, 'my_appointments.html', context)
 
 
-# @login_required(login_url='/login/')
-# def update_profile(request):
-#     context['page_title'] = 'Update Profile'
-#     user = request.user
-#     if not request.method == 'POST':
-#         form = UpdateProfile(user=user)
-#         context['form'] = form
-#     else:
-#         form = UpdateProfile(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, "Profile has been updated")
-#             return redirect("home")
-#         else:
-#             context['form'] = form
-#
-#     context['unread_count'] = unread_notifications_count(request)
-#     return render(request, 'update_profile.html', context)
 
 @login_required(login_url='/login/')
 def update_profile(request):
-    context = {'page_title': 'Update Profile'}  # Ensure context is always defined
+    context = {'page_title': 'Update Profile'}
     user = request.user
+    # old_pass_user = user.password
 
     if request.method == 'POST':
         form = UpdateProfile(request.POST)
+        # print(form)
+        # print("formmmmmmmm")
         if form.is_valid():
-            form.save()
-            messages.success(request, "Profile has been updated.")
-            return redirect("home")
-        else:
-            messages.error(request, "Please correct the error below.")
+            old_pass = form.cleaned_data.get('password')
+            new_pass1 = form.cleaned_data.get('new_password1')
+            new_pass2 = form.cleaned_data.get('new_password2')
+            # print(old_pass, new_pass1, new_pass2, "sknvuoernwomfcec")
+            # print(user.check_password(old_pass))
+            if user.check_password(old_pass) and new_pass1 == new_pass2:
+                user.set_password(new_pass1)
+                user.save()
+                messages.success(request, "Profile has been updated.")
+                return redirect("home")
+            else:
+                messages.error(request, "Please correct the error below.")
     else:
-        form = UpdateProfile(user=user)
+        # form = UpdateProfile(user=user)
+        form = UpdateProfile()
 
     context['form'] = form
     context['unread_count'] = unread_notifications_count(request)

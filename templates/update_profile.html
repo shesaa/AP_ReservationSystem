@@ -6,13 +6,43 @@
     <title>Update Profile - Clinic Appointment</title>
     <style>
 
-{#        .content {#}
-{#    display: flex;#}
-{#    justify-content: center;#}
-{#    align-items: center;#}
-{#    min-height: calc(100vh - 60px); /* Adjust 60px to the height of your navbar */#}
-{#    flex-direction: column;#}
-{#}#}
+
+        .form-wrapper {
+            background: #f1f1f1;
+            padding: 20px;
+            text-align: left;
+            display: inline-block;
+            max-width: 400px; /* Adjust as needed */
+            width: 100%;
+        }
+        /* Style for form groups */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        /* Style for form labels */
+        .form-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        /* Style for form inputs */
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        /* Style for submit button */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #009cdf; /* A shade of blue */
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
 
 .popup-message-container {
     position: fixed;
@@ -117,7 +147,7 @@
 
     </style>
 </head>
-<body>
+<body> {% if request.user.user_type == 'C' %}class="green-theme"{% endif %}>
 
 <!-- Popup Message Container -->
 <div id="popupMessage" class="popup-message-container" style="display: none;">
@@ -153,23 +183,24 @@
             <span id="username"></span>
             <div class="green-light"></div>
         </div>
-<div class="content">
+<div class="content" style="text-align: center;">
     <h1>Update Profile</h1>
-    <!-- Messages Display -->
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <!-- Update Profile Form -->
-    <form method="POST" style="max-width: 400px; width: 100%;">
+
+    <form method="post" class="form-wrapper">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-primary" type="submit">Update</button>
+        <div class="form-group">
+            <label for="password" class="form-label">Old Password:</label>
+            <input type="password" name="password" id="password" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="new_password1" class="form-label">New Password:</label>
+            <input type="password" name="new_password1" id="new_password1" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="new_password2" class="form-label">Confirm New Password:</label>
+            <input type="password" name="new_password2" id="new_password2" class="form-input">
+        </div>
+        <button type="submit" class="submit-btn">Update</button>
     </form>
 </div>
 
@@ -180,11 +211,11 @@
 
         $(document).ready(function () {
             $('form').submit(function (e) {
-                var newPassword1 = $('#id_new_password1').val();
-                var newPassword2 = $('#id_new_password2').val();
+                var newPassword1 = $('#new_password1').val();
+                var newPassword2 = $('#new_password2').val();
 
                 if (newPassword1 !== newPassword2) {
-                    alert("New passwords do not match.");
+                    showPopupMessage("New passwords do not match.", true);
                     e.preventDefault();
                 }
             });
